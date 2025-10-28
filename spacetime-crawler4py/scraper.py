@@ -40,7 +40,7 @@ def extract_next_links(url, resp):
         url, _ = urldefrag(url)  
         # add link to list
         links.append(url)
-
+        
     return links
 
 
@@ -49,9 +49,17 @@ def is_valid(url):
     # If you decide to crawl it, return True; otherwise return False.
     # There are already some conditions that return False.
     try:
+        url, _ = urldefrag(url)
         parsed = urlparse(url)
         if parsed.scheme not in set(["http", "https"]):
             return False
+
+        # only links in domain should be valid
+        domains = ['ics.uci.edu', 'cs.uci.edu', 'informatics.uci.edu', 'stat.uci.edu']
+        # netloc returns the hostname/authority
+        if not any(parsed.netloc.endswith(d) for d in domains):
+            return False
+            
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
@@ -61,7 +69,7 @@ def is_valid(url):
             + r"|epub|dll|cnf|tgz|sha1"
             + r"|thmx|mso|arff|rtf|jar|csv"
             + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path.lower())
-
+    
     except TypeError:
         print ("TypeError for ", parsed)
         raise
