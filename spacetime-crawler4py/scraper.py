@@ -1,9 +1,45 @@
 import re
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, urljoin, urldefrag
+import tokenizer_temp
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
+    validLinks = []
+    # list of subDomains of uci.edu
+    subDomains = {}
+    unique_Pages = []
+    # cycles through every link extracted
+    for link in links:
+        # only keeps and looks at valid links
+        if is_valid(link):
+            # appends all valid links to return list
+            validLinks.append(link)
+
+            # extracts domain and path for subdomain counting
+            parsed = urlparse(link)
+            domain = parsed.netloc
+            path = parsed.path
+            domain_path = domain + path
+
+            # counts unique pages in uci.edu subdomains
+            if ("uci.edu" in domain):
+                if domain_path not in unique_Pages:
+                    unique_Pages.append(domain_path)
+                    if domain in subDomains:
+                        subDomains[domain] += 1
+                    else:
+                        subDomains[domain] = 1
+            
+    
+    # puts dict in alphabetical order for subdomains | Question 4
+    sorted_items = sorted(subDomains.items(), key=lambda item: item[1], reverse=True)
+    # number of unique pages | Question 1
+    num_of_unique_pages = len(unique_Pages)
+    return validLinks
+
+
+
     return [link for link in links if is_valid(link)]
 
 def extract_next_links(url, resp):
