@@ -95,7 +95,7 @@ def is_calendar_pattern(url):
 def ui_state_pattern(url):
     decoded_url = unquote(url)
     decoded_url = unquote(decoded_url)
-    ui_states = ["do=media", "tab_", "view=", "image=", "ns="]
+    ui_states = ["do=media", "tab_", "view=", "image=", "ns=", "tribe_", "ical="]
     return any(u in url for u in ui_states)
 
 
