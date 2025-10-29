@@ -102,7 +102,7 @@ def ui_state_pattern(url):
 def has_session(url):
     decoded_url = unquote(url)
     decoded_url = unquote(decoded_url)
-    sid_keys = ["sid=", "session=", "phpsessid=", "jsessionid=", "session", "id", "do=diff"]
+    sid_keys = ["sid=", "session=", "phpsessid=", "jsessionid=", "session", "id", "diff"]
     return any(k in url for k in sid_keys)
 
 
