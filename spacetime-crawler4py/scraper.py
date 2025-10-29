@@ -1,7 +1,9 @@
 import re
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, urljoin, urldefrag
-import tokenizer_temp
+import tokenizer
+import requests
+
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
@@ -30,17 +32,17 @@ def scraper(url, resp):
                         subDomains[domain] += 1
                     else:
                         subDomains[domain] = 1
-            
-    
+
     # puts dict in alphabetical order for subdomains | Question 4
     sorted_items = sorted(subDomains.items(), key=lambda item: item[1], reverse=True)
     # number of unique pages | Question 1
     num_of_unique_pages = len(unique_Pages)
+
+    print(validLinks)
     return validLinks
 
+    # return [link for link in links if is_valid(link)]
 
-
-    return [link for link in links if is_valid(link)]
 
 def extract_next_links(url, resp):
     # Implementation required.
@@ -69,19 +71,19 @@ def extract_next_links(url, resp):
         # get the web_link.com/... part
         href = a['href']
         # handles absolute and relative links
-            # if url is an absolute one, it leaves url unchanged
-            # otherwise if it is relative, it appends the resp.url
+        # if url is an absolute one, it leaves url unchanged
+        # otherwise if it is relative, it appends the resp.url
         url = urljoin(resp.url, href)
         # remove fragment
-        url, _ = urldefrag(url)  
+        url, _ = urldefrag(url)
         # add link to list
         links.append(url)
-        
+
     return links
 
 
 def is_valid(url):
-    # Decide whether to crawl this url or not. 
+    # Decide whether to crawl this url or not.
     # If you decide to crawl it, return True; otherwise return False.
     # There are already some conditions that return False.
     try:
@@ -95,7 +97,7 @@ def is_valid(url):
         # netloc returns the hostname/authority
         if not any(parsed.netloc.endswith(d) for d in domains):
             return False
-            
+
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
@@ -105,7 +107,45 @@ def is_valid(url):
             + r"|epub|dll|cnf|tgz|sha1"
             + r"|thmx|mso|arff|rtf|jar|csv"
             + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path.lower())
-    
+
     except TypeError:
-        print ("TypeError for ", parsed)
+        print("TypeError for ", parsed)
         raise
+
+
+# longest page in terms of number of words | Question 2
+def find_longest_page(links):
+    # Argument is the list of links to parse and check the length of
+    # words within the page excluding the text markups
+    # Returns the link as a string with the longest page in terms of words
+
+    max_length = 0
+    longest_page = ""
+
+    for link in links:
+        # GET request for each link
+        response = requests.get(link)
+
+        # only parses links that return success status
+        if (response.status_code != 200):
+            continue
+        else:
+            # retrieve text from the html
+            content = response.text
+            soup = BeautifulSoup(content, "html.parser")
+
+            # removes all style and script from html and exracts text from page
+            for line in soup(['style', 'script']):
+                line.decompose()
+            page_text = soup.get_text()
+
+            # clean the text by removing extra whitespace and newlines
+            cleaned_text = re.sub(r'\s+', ' ', page_text).strip()
+            all_words = cleaned_text.split()
+
+            # updates max_length and current link to longest page
+            if len(all_words) > max_length:
+                max_length = len(all_words)
+                longest_page = link
+
+    return longest_page
