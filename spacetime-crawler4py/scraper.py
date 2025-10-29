@@ -2,7 +2,6 @@ import re
 from bs4 import BeautifulSoup
 from urllib.parse import unquote, urlparse, urljoin, urldefrag
 import tokenizer
-import requests
 
 
 def scraper(url, resp):
@@ -103,10 +102,20 @@ def has_session(url):
     return any(k in url for k in sid_keys)
 
 
+def is_page_pattern(url):
+    PAGINATION_KEYS = ["page=", "p=", "start=", "offset=", "pageNumber=", "pageNo=", "page/"]
+    return any(k in url for k in PAGINATION_KEYS)
+
+
 def is_trap(url):
-    if is_calendar_pattern(url): return True
-    if ui_state_pattern(url): return True
-    if has_session(url): return True
+    if is_calendar_pattern(url):
+        return True
+    if ui_state_pattern(url):
+        return True
+    if has_session(url):
+        return True
+    if is_page_pattern(url):
+        return True
     return False
 
 
@@ -142,40 +151,3 @@ def is_valid(url):
         print("TypeError for ", parsed)
         raise
 
-
-# longest page in terms of number of words | Question 2
-def find_longest_page(links):
-    # Argument is the list of links to parse and check the length of
-    # words within the page excluding the text markups
-    # Returns the link as a string with the longest page in terms of words
-
-    max_length = 0
-    longest_page = ""
-
-    for link in links:
-        # GET request for each link
-        response = requests.get(link)
-
-        # only parses links that return success status
-        if (response.status_code != 200):
-            continue
-        else:
-            # retrieve text from the html
-            content = response.text
-            soup = BeautifulSoup(content, "html.parser")
-
-            # removes all style and script from html and exracts text from page
-            for line in soup(['style', 'script']):
-                line.decompose()
-            page_text = soup.get_text()
-
-            # clean the text by removing extra whitespace and newlines
-            cleaned_text = re.sub(r'\s+', ' ', page_text).strip()
-            all_words = cleaned_text.split()
-
-            # updates max_length and current link to longest page
-            if len(all_words) > max_length:
-                max_length = len(all_words)
-                longest_page = link
-
-    return longest_page
