@@ -2,45 +2,44 @@ import re
 from bs4 import BeautifulSoup
 from urllib.parse import unquote, urlparse, urljoin, urldefrag
 import tokenizer
-import requests
 
+#ISSUES 
+# 2025-10-29 11:06:29,863 - Worker-0 - INFO - Downloaded https://www.stat.uci.edu/wp-content/uploads/Shujie-Ma-Abstract-5-5-22, status <200>, using cache ('styx.ics.uci.edu', 9002).
+# encoding error : input conversion failed due to input error, bytes 0x90 0xFC 0x1F 0x6E
+
+# globals for analysis
+unique_pages = set()
+longest_page = 0
+longest_page_url = ""
+word_freq = {}
+subdomains = {}
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
-    validLinks = []
-    # list of subDomains of uci.edu
-    subDomains = {}
-    unique_Pages = []
-    # cycles through every link extracted
-    for link in links:
-        # only keeps and looks at valid links
-        if is_valid(link):
-            # appends all valid links to return list
-            validLinks.append(link)
+    return [link for link in links if is_valid(link)]
 
-            # extracts domain and path for subdomain counting
-            parsed = urlparse(link)
-            domain = parsed.netloc
-            path = parsed.path
-            domain_path = domain + path
+def analysis(url, content):
+    global longest_page, longest_page_url, word_freq, subdomains, unique_pages
 
-            # counts unique pages in uci.edu subdomains
-            if ("uci.edu" in domain):
-                if domain_path not in unique_Pages:
-                    unique_Pages.append(domain_path)
-                    if domain in subDomains:
-                        subDomains[domain] += 1
-                    else:
-                        subDomains[domain] = 1
+    # defragment URL
+    url, _ = urldefrag(url)
+    unique_pages.add(url)
 
-    # puts dict in alphabetical order for subdomains | Question 4
-    sorted_items = sorted(subDomains.items(), key=lambda item: item[1], reverse=True)
-    # number of unique pages | Question 1
-    num_of_unique_pages = len(unique_Pages)
+    # parse text
+    word_count, freq = tokenizer.compute_text_frequencies(content)
 
-    return validLinks
+    # update longest page
+    if word_count > longest_page:
+        longest_page = word_count
+        longest_page_url = url
 
-    # return [link for link in links if is_valid(link)]
+    # update word frequencies
+    word_freq = tokenizer.union_freq(word_freq, freq)
+
+    # update subdomains
+    parsed = urlparse(url)
+    if "uci.edu" in parsed.netloc:
+        subdomains[parsed.netloc] = subdomains.get(parsed.netloc, 0) + 1
 
 
 def extract_next_links(url, resp):
@@ -55,13 +54,17 @@ def extract_next_links(url, resp):
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
 
     # if status code is not 200, error has occurred and we cannot extract content
-    if resp.status != 200:
+    if resp.status != 200 or resp.raw_response is None or resp.raw_response.content is None:
         return []
 
     # get content of page
     html_content = resp.raw_response.content
     # parse with BeautifulSoup
     soup = BeautifulSoup(html_content, 'lxml')
+
+    # do analysis
+    text = soup.get_text(strip=True)
+    analysis(url, text)
 
     # extract links
     links = []
@@ -144,38 +147,38 @@ def is_valid(url):
 
 
 # longest page in terms of number of words | Question 2
-def find_longest_page(links):
-    # Argument is the list of links to parse and check the length of
-    # words within the page excluding the text markups
-    # Returns the link as a string with the longest page in terms of words
+# def find_longest_page(links):
+#     # Argument is the list of links to parse and check the length of
+#     # words within the page excluding the text markups
+#     # Returns the link as a string with the longest page in terms of words
 
-    max_length = 0
-    longest_page = ""
+#     max_length = 0
+#     longest_page = ""
 
-    for link in links:
-        # GET request for each link
-        response = requests.get(link)
+#     for link in links:
+#         # GET request for each link
+#         # response = requests.get(link)
 
-        # only parses links that return success status
-        if (response.status_code != 200):
-            continue
-        else:
-            # retrieve text from the html
-            content = response.text
-            soup = BeautifulSoup(content, "html.parser")
+#         # only parses links that return success status
+#         if (response.status_code != 200):
+#             continue
+#         else:
+#             # retrieve text from the html
+#             content = response.text
+#             soup = BeautifulSoup(content, "html.parser")
 
-            # removes all style and script from html and exracts text from page
-            for line in soup(['style', 'script']):
-                line.decompose()
-            page_text = soup.get_text()
+#             # removes all style and script from html and exracts text from page
+#             for line in soup(['style', 'script']):
+#                 line.decompose()
+#             page_text = soup.get_text()
 
-            # clean the text by removing extra whitespace and newlines
-            cleaned_text = re.sub(r'\s+', ' ', page_text).strip()
-            all_words = cleaned_text.split()
+#             # clean the text by removing extra whitespace and newlines
+#             cleaned_text = re.sub(r'\s+', ' ', page_text).strip()
+#             all_words = cleaned_text.split()
 
-            # updates max_length and current link to longest page
-            if len(all_words) > max_length:
-                max_length = len(all_words)
-                longest_page = link
+#             # updates max_length and current link to longest page
+#             if len(all_words) > max_length:
+#                 max_length = len(all_words)
+#                 longest_page = link
 
-    return longest_page
+#     return longest_page

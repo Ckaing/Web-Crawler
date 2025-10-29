@@ -20,6 +20,14 @@ STOP_WORDS = {
     "you'd", "you'll", "you're", "you've", 'your', 'yours', 'yourself', 'yourselves'
 }
 
+def compute_text_frequencies(text):
+    tokens = tokenize(text)
+    if tokens is not None:
+        freq = compute_word_frequencies(tokens)
+        return len(tokens), freq
+    else:
+        print('Please resolve the error and try again.')
+        return None
 
 def tokenize(content):
     """
@@ -50,37 +58,35 @@ def compute_word_frequencies(tokens):
     """
     freq = {}
     for token in tokens:
-        if token not in freq:
-            freq[token] = 0
-        freq[token] += 1
+        if token not in STOP_WORDS:
+            if token not in freq:
+                freq[token] = 0
+            freq[token] += 1
     return freq
 
 
-def compute_text_frequencies(text):
-    tokens = tokenize(text)
-    if tokens is not None:
-        freq = compute_word_frequencies(tokens)
-        return freq
-    else:
-        print('Please resolve the error and try again.')
-        return None
+def union_freq(freq1, freq2):
+    result = {}
+    for key in freq1.keys() | freq2.keys(): 
+        result[key] = freq1.get(key, 0) + freq2.get(key, 0)
+    return result
 
 
-def intersection(content1, content2):
-    """
-    Runtime complexity: Linear time O(n1 + n2 + k1 + k2), where n1 and n2 are the number of characters 
-    in each file and k1 and k2 are the number of tokens.
-    Explanation: Both files are read character by character, and all tokens are then counted 
-    for frequency and compared for intersection.
-    """
-    freq_1 = compute_text_frequencies(content1)
-    freq_2 = compute_text_frequencies(content2)
+# def intersection(content1, content2):
+#     """
+#     Runtime complexity: Linear time O(n1 + n2 + k1 + k2), where n1 and n2 are the number of characters 
+#     in each file and k1 and k2 are the number of tokens.
+#     Explanation: Both files are read character by character, and all tokens are then counted 
+#     for frequency and compared for intersection.
+#     """
+#     freq_1 = compute_text_frequencies(content1)
+#     freq_2 = compute_text_frequencies(content2)
 
-    if freq_1 is None or freq_2 is None:
-        return None
+#     if freq_1 is None or freq_2 is None:
+#         return None
 
-    unique_tokens_1 = freq_1.keys()
-    unique_tokens_2 = freq_2.keys()
-    intersect = unique_tokens_1 & unique_tokens_2
+#     unique_tokens_1 = freq_1.keys()
+#     unique_tokens_2 = freq_2.keys()
+#     intersect = unique_tokens_1 & unique_tokens_2
 
-    return intersect
+#     return intersect
