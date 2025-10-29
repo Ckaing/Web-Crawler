@@ -1,6 +1,6 @@
 import re
 from bs4 import BeautifulSoup
-from urllib.parse import urlparse, urljoin, urldefrag
+from urllib.parse import unquote, urlparse, urljoin, urldefrag
 import tokenizer
 import requests
 
@@ -38,7 +38,6 @@ def scraper(url, resp):
     # number of unique pages | Question 1
     num_of_unique_pages = len(unique_Pages)
 
-    print(validLinks)
     return validLinks
 
     # return [link for link in links if is_valid(link)]
@@ -82,6 +81,35 @@ def extract_next_links(url, resp):
     return links
 
 
+def is_calendar_pattern(url):
+    # Checks if the url is in the pattern of a calendar and returns bool
+    calendar_pattern = re.compile(r'(?i)(\b(19|20)\d{2}[-/](0?[1-9]|1[0-2])\b)|month=|date=')
+    decoded_url = unquote(url)
+    decoded_url = unquote(decoded_url)
+    return bool(calendar_pattern.search(decoded_url))
+
+
+def ui_state_pattern(url):
+    decoded_url = unquote(url)
+    decoded_url = unquote(decoded_url)
+    ui_states = ["do=media", "tab_", "view=", "image=", "ns="]
+    return any(u in url for u in ui_states)
+
+
+def has_session(url):
+    decoded_url = unquote(url)
+    decoded_url = unquote(decoded_url)
+    sid_keys = ["sid=", "session=", "phpsessid=", "jsessionid=", "session"]
+    return any(k in url for k in sid_keys)
+
+
+def is_trap(url):
+    if is_calendar_pattern(url): return True
+    if ui_state_pattern(url): return True
+    if has_session(url): return True
+    return False
+
+
 def is_valid(url):
     # Decide whether to crawl this url or not.
     # If you decide to crawl it, return True; otherwise return False.
@@ -90,6 +118,8 @@ def is_valid(url):
         url, _ = urldefrag(url)
         parsed = urlparse(url)
         if parsed.scheme not in set(["http", "https"]):
+            return False
+        if is_trap(url):
             return False
 
         # only links in domain should be valid
