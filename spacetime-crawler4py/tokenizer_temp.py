@@ -53,9 +53,9 @@ class Text_Processing:
                 # Checks if word is in stop words
                 if general_word not in STOP_WORDS:
                     if general_word in dict_of_tokens:
-                        dict_of_tokens[general_word]+=1
+                        dict_of_tokens[general_word] += 1
                     else:
-                        dict_of_tokens[general_word] = 1  
+                        dict_of_tokens[general_word] = 1
             # If the word is not alphanumeric, it makes it alphanumeric by removing any non-alphanum characters
             # replacing it with a space, splitting it again to add back to the dict
             else:
