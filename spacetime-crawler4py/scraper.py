@@ -102,7 +102,7 @@ def ui_state_pattern(url):
 def has_session(url):
     decoded_url = unquote(url)
     decoded_url = unquote(decoded_url)
-    sid_keys = ["sid=", "session=", "phpsessid=", "jsessionid=", "session", "id", "diff"]
+    sid_keys = ["sid=", "session=", "phpsessid=", "jsessionid=", "session", "id=", "diff"]
     return any(k in url for k in sid_keys)
 
 
@@ -119,7 +119,7 @@ def is_tracking_pattern(url):
 
 
 def is_faceted_nav(url):
-    facets = ["color=", "size=", "style=", "brand=", "filter="]
+    facets = ["color=", "size=", "style=", "brand=", "filter=", "sort="]
     return sum(p in url for p in facets) > 2 
 
 
