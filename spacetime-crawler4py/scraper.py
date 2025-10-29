@@ -102,12 +102,12 @@ def ui_state_pattern(url):
 def has_session(url):
     decoded_url = unquote(url)
     decoded_url = unquote(decoded_url)
-    sid_keys = ["sid=", "session=", "phpsessid=", "jsessionid=", "session", "id=", "diff", "idx="]
+    sid_keys = ["sid=", "session=", "phpsessid=", "jsessionid=", "session", "id="]
     return any(k in url for k in sid_keys)
 
 
 def is_page_pattern(url):
-    PAGINATION_KEYS = ["page=", "p=", "start=", "offset=", "pageNumber=", "pageNo=", "page/"]
+    PAGINATION_KEYS = ["page=", "p=", "start=", "offset=", "pageNumber=", "pageNo="]
     return any(k in url for k in PAGINATION_KEYS)
 
 
