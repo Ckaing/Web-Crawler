@@ -96,19 +96,21 @@ def ui_state_pattern(url):
     decoded_url = unquote(url)
     decoded_url = unquote(decoded_url)
     ui_states = ["do=media", "tab_", "view=", "image=", "ns=", "tribe_", "ical="]
-    return any(u in url for u in ui_states)
+    return any(u in decoded_url for u in ui_states)
 
 
 def has_session(url):
     decoded_url = unquote(url)
     decoded_url = unquote(decoded_url)
     sid_keys = ["sid=", "session=", "phpsessid=", "jsessionid=", "session", "id="]
-    return any(k in url for k in sid_keys)
+    return any(k in decoded_url for k in sid_keys)
 
 
 def is_page_pattern(url):
-    PAGINATION_KEYS = ["page=", "p=", "start=", "offset=", "pageNumber=", "pageNo="]
-    return any(k in url for k in PAGINATION_KEYS)
+    decoded_url = unquote(url)
+    decoded_url = unquote(decoded_url)
+    PAGINATION_KEYS = ["page=", "p=", "start=", "offset=", "pageNumber=", "pageNo=", "page/"]
+    return any(k in decoded_url for k in PAGINATION_KEYS)
 
 
 def is_tracking_pattern(url):
@@ -119,8 +121,10 @@ def is_tracking_pattern(url):
 
 
 def is_faceted_nav(url):
+    decoded_url = unquote(url)
+    decoded_url = unquote(decoded_url)
     facets = ["color=", "size=", "style=", "brand=", "filter=", "sort="]
-    return sum(p in url for p in facets) > 2 
+    return sum(p in decoded_url for p in facets) > 2 
 
 
 def is_trap(url):
