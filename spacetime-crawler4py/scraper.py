@@ -95,7 +95,7 @@ def is_calendar_pattern(url):
 def ui_state_pattern(url):
     decoded_url = unquote(url)
     decoded_url = unquote(decoded_url)
-    ui_states = ["do=media", "tab_", "view=", "image=", "ns=", "tribe_", "ical="]
+    ui_states = ["do=", "tab_", "view=", "image=", "ns=", "tribe_", "ical="] #old do=media
     return any(u in url for u in ui_states)
 
 
@@ -112,7 +112,7 @@ def is_page_pattern(url):
 
 
 def is_tracking_pattern(url):
-    TRACKING_KEYS = ["utm_", "fbclid", "gclid", "ref=", "referrer=", "source=", "campaign=", "mc_"]
+    TRACKING_KEYS = ["utm_", "fbclid", "gclid", "ref=", "referrer=", "source=", "campaign=", "mc_", "idx="]
     decoded_url = unquote(url)
     decoded_url = unquote(decoded_url)
     return any(k in decoded_url.lower() for k in TRACKING_KEYS)
@@ -153,8 +153,9 @@ def is_valid(url):
 
         # only links in domain should be valid
         domains = ['ics.uci.edu', 'cs.uci.edu', 'informatics.uci.edu', 'stat.uci.edu']
+        ignore_domains = ['gitlab', 'wics']
         # netloc returns the hostname/authority
-        if not any(parsed.netloc.endswith(d) for d in domains):
+        if not any(parsed.netloc == d or parsed.netloc.endswith('.' + d) for d in domains) or any((d + '.') in parsed.netloc for d in ignore_domains):
             return False
 
         return not re.match(
