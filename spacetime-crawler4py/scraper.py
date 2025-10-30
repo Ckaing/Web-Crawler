@@ -1,5 +1,6 @@
 import re
 from bs4 import BeautifulSoup
+from difflib import SequenceMatcher
 from urllib.parse import unquote, urlparse, urljoin, urldefrag
 import tokenizer
 
@@ -7,12 +8,19 @@ import tokenizer
 # 2025-10-29 11:06:29,863 - Worker-0 - INFO - Downloaded https://www.stat.uci.edu/wp-content/uploads/Shujie-Ma-Abstract-5-5-22, status <200>, using cache ('styx.ics.uci.edu', 9002).
 # encoding error : input conversion failed due to input error, bytes 0x90 0xFC 0x1F 0x6E
 
+# constants for TRAP depth
+MAX_PAGE_DEPTH = 10
+MAX_CALENDAR_DEPTH = 10
+MAX_SIM_URL = 5
+
 # globals for analysis
 unique_pages = set()
 longest_page = 0
 longest_page_url = ""
 word_freq = {}
 subdomains = {}
+prev_url = ""
+trap_counts = {"calendar_count": 0, "page_count": 0, "sim_url": 0}
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
@@ -85,32 +93,41 @@ def extract_next_links(url, resp):
 
 
 def is_calendar_pattern(url):
-    # Checks if the url is in the pattern of a calendar and returns bool
+    global trap_counts
     calendar_pattern = re.compile(r'(?i)(\b(19|20)\d{2}[-/](0?[1-9]|1[0-2])\b)|month=|date=')
     decoded_url = unquote(url)
     decoded_url = unquote(decoded_url)
-    return bool(calendar_pattern.search(decoded_url))
+    if "from=" in decoded_url:
+        trap_counts["calendar_count"] += 1
+    if calendar_pattern.search(decoded_url):
+        trap_counts["calendar_count"] += 1
+    return trap_counts["calendar_count"] > MAX_CALENDAR_DEPTH
 
 
 def ui_state_pattern(url):
     decoded_url = unquote(url)
     decoded_url = unquote(decoded_url)
-    ui_states = ["do=media", "tab_", "view=", "image=", "ns=", "tribe_", "ical="]
+    ui_states = ["do=media", "tab_", "view=", "image=", "ns=", "tribe_", "ical=", "do=diff"]
     return any(u in decoded_url for u in ui_states)
 
 
 def has_session(url):
     decoded_url = unquote(url)
     decoded_url = unquote(decoded_url)
-    sid_keys = ["sid=", "session=", "phpsessid=", "jsessionid=", "session", "id="]
+    sid_keys = ["sid=", "session=", "phpsessid=", "jsessionid=", "session", "id=", "version="]
     return any(k in decoded_url for k in sid_keys)
 
 
 def is_page_pattern(url):
+    global trap_counts
     decoded_url = unquote(url)
     decoded_url = unquote(decoded_url)
     PAGINATION_KEYS = ["page=", "p=", "start=", "offset=", "pageNumber=", "pageNo=", "page/"]
-    return any(k in decoded_url for k in PAGINATION_KEYS)
+    if any(k in decoded_url for k in PAGINATION_KEYS):
+        trap_counts["page_count"] += 1
+    else:
+        trap_counts["page_count"] = 0
+    return trap_counts["page_count"] > MAX_PAGE_DEPTH
 
 
 def is_tracking_pattern(url):
@@ -127,6 +144,28 @@ def is_faceted_nav(url):
     return sum(p in decoded_url for p in facets) > 2 
 
 
+def trap_domain(url):
+    trap_domains = ["wics.ics", "ngs.ics"]
+    parsed = urlparse(url)
+    if (parsed.netloc == "isg.ics.uci.edu" and parsed.path.startswith("/event")):
+        return True
+    if any(parsed.netloc.startswith(d) for d in trap_domains):
+        return True
+    return False
+
+
+def similar_url(url):
+    global prev_url, trap_counts
+    similar = SequenceMatcher(None, prev_url, url).ratio()
+    if similar > 0.9:
+        prev_url = url
+        trap_counts["sim_url"] += 1
+        return trap_counts["sim_url"] > MAX_SIM_URL
+    trap_counts["sim_url"] = 0
+    prev_url = url
+    return False
+
+
 def is_trap(url):
     if is_calendar_pattern(url):
         return True
@@ -136,9 +175,13 @@ def is_trap(url):
         return True
     if is_page_pattern(url):
         return True
+    if trap_domain(url):
+        return True
     if is_tracking_pattern(url):
         return True
     if is_faceted_nav(url):
+        return True
+    if similar_url(url):
         return True
     return False
 
@@ -174,4 +217,3 @@ def is_valid(url):
     except TypeError:
         print("TypeError for ", parsed)
         raise
-
