@@ -1,6 +1,5 @@
 import re
 from bs4 import BeautifulSoup
-from difflib import SequenceMatcher
 from urllib.parse import unquote, urlparse, urljoin, urldefrag
 import tokenizer
 
@@ -18,7 +17,7 @@ longest_page_url = ""
 word_freq = {}
 subdomains = {}
 prev_url = ""
-trap_counts = {"calendar_count": 0, "page_count": 0}
+trap_counts = {"calendar_count": 0}
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
