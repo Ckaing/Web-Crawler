@@ -70,6 +70,9 @@ def extract_next_links(url, resp):
 
     # do analysis
     text = soup.get_text(strip=True)
+    words = text.split()
+    if (len(words) < 100):
+        return []
     analysis(url, text)
 
     # extract links
@@ -160,9 +163,9 @@ def is_valid(url):
 
         # only links in domain should be valid
         domains = ['ics.uci.edu', 'cs.uci.edu', 'informatics.uci.edu', 'stat.uci.edu']
-        ignore_domains = ['gitlab', 'wics']
+        ignore_domains = ['gitlab', 'wics', 'physics']
         # netloc returns the hostname/authority
-        if not any(parsed.netloc == d or parsed.netloc.endswith('.' + d) for d in domains) or any(d in parsed.netloc for d in ignore_domains):
+        if not any(parsed.netloc == d or parsed.netloc.endswith('.' + d) for d in domains) or any((d + ".") in parsed.netloc for d in ignore_domains):
             return False
 
         return not re.match(
