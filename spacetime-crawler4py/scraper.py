@@ -20,7 +20,7 @@ longest_page_url = ""
 word_freq = {}
 subdomains = {}
 prev_url = ""
-trap_counts = {"calendar_count": 0, "page_count": 0, "sim_url": 0}
+trap_counts = {"calendar_count": 0, "page_count": 0}
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
@@ -107,7 +107,7 @@ def is_calendar_pattern(url):
 def ui_state_pattern(url):
     decoded_url = unquote(url)
     decoded_url = unquote(decoded_url)
-    ui_states = ["do=", "tab_", "view=", "image=", "ns=", "tribe_", "ical="] #old do=media
+    ui_states = ["do=", "tab_", "view=", "image=", "ns=", "tribe_", "ical=", "version="] #old do=media
     return any(u in url for u in ui_states)
 
 
@@ -118,71 +118,31 @@ def has_session(url):
     return any(k in decoded_url for k in sid_keys)
 
 
-def is_page_pattern(url):
-    global trap_counts
-    decoded_url = unquote(url)
-    decoded_url = unquote(decoded_url)
-    PAGINATION_KEYS = ["page=", "p=", "start=", "offset=", "pageNumber=", "pageNo=", "page/"]
-    if any(k in decoded_url for k in PAGINATION_KEYS):
-        trap_counts["page_count"] += 1
-    else:
-        trap_counts["page_count"] = 0
-    return trap_counts["page_count"] > MAX_PAGE_DEPTH
-
-
-def is_tracking_pattern(url):
-    TRACKING_KEYS = ["utm_", "fbclid", "gclid", "ref=", "referrer=", "source=", "campaign=", "mc_", "idx="]
-    decoded_url = unquote(url)
-    decoded_url = unquote(decoded_url)
-    return any(k in decoded_url.lower() for k in TRACKING_KEYS)
-
-
 def is_faceted_nav(url):
     decoded_url = unquote(url)
     decoded_url = unquote(decoded_url)
-    facets = ["color=", "size=", "style=", "brand=", "filter=", "sort="]
-    return sum(p in decoded_url for p in facets) > 2 
+    facets = ["filter=", "sort=", "format=", "precision=second"]
+    return any(p in decoded_url for p in facets)
 
 
 def trap_domain(url):
     trap_domains = ["wics.ics", "ngs.ics"]
+    trap_paths = ["/event", "/~eppstein", "/doku.php"]
     parsed = urlparse(url)
-    if (parsed.netloc == "isg.ics.uci.edu" and parsed.path.startswith("/event")):
+    if any(parsed.path.startswith(d) for d in trap_paths):
         return True
     if any(parsed.netloc.startswith(d) for d in trap_domains):
         return True
     return False
 
 
-def similar_url(url):
-    global prev_url, trap_counts
-    similar = SequenceMatcher(None, prev_url, url).ratio()
-    if similar > 0.9:
-        prev_url = url
-        trap_counts["sim_url"] += 1
-        return trap_counts["sim_url"] > MAX_SIM_URL
-    trap_counts["sim_url"] = 0
-    prev_url = url
-    return False
-
-
 def is_trap(url):
-    if is_calendar_pattern(url):
-        return True
     if ui_state_pattern(url):
-        return True
-    if has_session(url):
-        return True
-    if is_page_pattern(url):
         return True
     if trap_domain(url):
         return True
-    if is_tracking_pattern(url):
-        return True
-    if is_faceted_nav(url):
-        return True
-    if similar_url(url):
-        return True
+    # if is_faceted_nav(url):
+    #     return True
     return False
 
 
@@ -202,7 +162,7 @@ def is_valid(url):
         domains = ['ics.uci.edu', 'cs.uci.edu', 'informatics.uci.edu', 'stat.uci.edu']
         ignore_domains = ['gitlab', 'wics']
         # netloc returns the hostname/authority
-        if not any(parsed.netloc == d or parsed.netloc.endswith('.' + d) for d in domains) or any((d + '.') in parsed.netloc for d in ignore_domains):
+        if not any(parsed.netloc == d or parsed.netloc.endswith('.' + d) for d in domains) or any(d in parsed.netloc for d in ignore_domains):
             return False
 
         return not re.match(
