@@ -130,7 +130,7 @@ def is_faceted_nav(url):
 
 def trap_domain(url):
     trap_domains = ["wics.ics", "ngs.ics"]
-    trap_paths = ["/event", "/~eppstein", "/doku.php"]
+    trap_paths = ["/event", "/~eppstein/pix", "/doku.php"]
     parsed = urlparse(url)
     if any(parsed.path.startswith(d) for d in trap_paths):
         return True
