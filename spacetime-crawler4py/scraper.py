@@ -84,11 +84,14 @@ def extract_next_links(url, resp):
         # handles absolute and relative links
         # if url is an absolute one, it leaves url unchanged
         # otherwise if it is relative, it appends the resp.url
-        url = urljoin(resp.url, href)
-        # remove fragment
-        url, _ = urldefrag(url)
-        # add link to list
-        links.append(url)
+        try:
+            url = urljoin(resp.url, href)
+            # remove fragment
+            url, _ = urldefrag(url)
+            # add link to list
+            links.append(url)
+        except Exception as e:
+            continue
 
     return links
 
@@ -180,4 +183,7 @@ def is_valid(url):
 
     except TypeError:
         print("TypeError for ", parsed)
-        raise
+        return False
+    except ValueError:
+        print("ValueError for ", parsed)
+        return False
