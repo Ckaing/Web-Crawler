@@ -9,9 +9,7 @@ import tokenizer
 # encoding error : input conversion failed due to input error, bytes 0x90 0xFC 0x1F 0x6E
 
 # constants for TRAP depth
-MAX_PAGE_DEPTH = 10
 MAX_CALENDAR_DEPTH = 10
-MAX_SIM_URL = 5
 
 # globals for analysis
 unique_pages = set()
@@ -141,8 +139,10 @@ def is_trap(url):
         return True
     if trap_domain(url):
         return True
-    # if is_faceted_nav(url):
-    #     return True
+    if has_session(url):
+        return True
+    if is_faceted_nav(url):
+        return True
     return False
 
 
