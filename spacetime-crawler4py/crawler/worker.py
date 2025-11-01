@@ -6,6 +6,19 @@ from utils import get_logger
 import scraper
 import time
 
+from urllib.parse import urlparse
+
+# get the DOMAIN, not the subdomain
+def get_base_domain(url):
+    parsed = urlparse(url)  # [subdomain if applicable].domain.suffix
+    # get rid of subdomain --> extract just domain.suffix
+    host = parsed.netloc.lower()
+    domains = ['ics.uci.edu', 'cs.uci.edu', 'informatics.uci.edu', 'stat.uci.edu']
+    for d in domains:
+        if host == d or host.endswith('.' + d):
+            return d
+    return host
+
 
 class Worker(Thread):
     def __init__(self, worker_id, config, frontier):
@@ -23,6 +36,28 @@ class Worker(Thread):
             if not tbd_url:
                 self.logger.info("Frontier is empty. Stopping Crawler.")
                 break
+
+            # politeness implementation
+            # get domain
+            domain = get_base_domain(tbd_url)
+            wait = 0
+            with self.frontier.lock:
+                # get last time we accessed domain
+                last_time = self.frontier.last_access.get(domain, 0)
+                now = time.time()
+                # find how long it has been
+                elapsed = now - last_time
+                wait = max(0, self.config.time_delay - elapsed)
+                # UPDATES next access time before exiting lock
+                # this ensures that other threads that want access @ same time will
+                # sleep longer, because the .lock makes them wait for the updated time
+                self.frontier.last_access[domain] = now + wait
+
+            # sleep for however long is necessary
+            if wait > 0:
+                time.sleep(wait)
+            
+            # start download
             resp = download(tbd_url, self.config, self.logger)
             self.logger.info(
                 f"Downloaded {tbd_url}, status <{resp.status}>, "
@@ -31,4 +66,6 @@ class Worker(Thread):
             for scraped_url in scraped_urls:
                 self.frontier.add_url(scraped_url)
             self.frontier.mark_url_complete(tbd_url)
-            time.sleep(self.config.time_delay)
+
+            # maybe can remove later bc we have sleep but keep for safety reasons
+            # time.sleep(self.config.time_delay)
