@@ -1,7 +1,7 @@
 import re
 from bs4 import BeautifulSoup
 from urllib.parse import unquote, urlparse, urljoin, urldefrag
-import tokenizer
+from analyze import analysis
 
 #ISSUES 
 # 2025-10-29 11:06:29,863 - Worker-0 - INFO - Downloaded https://www.stat.uci.edu/wp-content/uploads/Shujie-Ma-Abstract-5-5-22, status <200>, using cache ('styx.ics.uci.edu', 9002).
@@ -10,41 +10,10 @@ import tokenizer
 # constants for TRAP depth
 MAX_CALENDAR_DEPTH = 10
 
-# globals for analysis
-unique_pages = set()
-longest_page = 0
-longest_page_url = ""
-word_freq = {}
-subdomains = {}
-prev_url = ""
-trap_counts = {"calendar_count": 0}
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
     return [link for link in links if is_valid(link)]
-
-def analysis(url, content):
-    global longest_page, longest_page_url, word_freq, subdomains, unique_pages
-
-    # defragment URL
-    url, _ = urldefrag(url)
-    unique_pages.add(url)
-
-    # parse text
-    word_count, freq = tokenizer.compute_text_frequencies(content)
-
-    # update longest page
-    if word_count > longest_page:
-        longest_page = word_count
-        longest_page_url = url
-
-    # update word frequencies
-    word_freq = tokenizer.union_freq(word_freq, freq)
-
-    # update subdomains
-    parsed = urlparse(url)
-    if "uci.edu" in parsed.netloc:
-        subdomains[parsed.netloc] = subdomains.get(parsed.netloc, 0) + 1
 
 
 def extract_next_links(url, resp):
@@ -62,6 +31,12 @@ def extract_next_links(url, resp):
     if resp.status != 200 or resp.raw_response is None or resp.raw_response.content is None:
         return []
 
+    # if page size less than 1000 bytes, skip 
+        # most likely low-information page (1000 bytes is a pretty short page)
+        # fyi 500 bytes is like basically empty (i.e. a 404 not found page)
+    if len(resp.raw_response.content) < 1000:
+        return []
+
     # get content of page
     html_content = resp.raw_response.content
     # parse with BeautifulSoup
@@ -70,8 +45,9 @@ def extract_next_links(url, resp):
     # do analysis
     text = soup.get_text(strip=True)
     words = text.split()
-    if (len(words) < 100):
-        return []
+    # NOTE 
+    # if (len(words) < 100):
+    #     return []
     analysis(url, text)
 
     # extract links
@@ -100,9 +76,7 @@ def is_calendar_pattern(url):
     calendar_pattern = re.compile(r'(?i)(\b(19|20)\d{2}[-/](0?[1-9]|1[0-2])\b)|month=|date=')
     decoded_url = unquote(url)
     decoded_url = unquote(decoded_url)
-    if "from=" in decoded_url:
-        trap_counts["calendar_count"] += 1
-    if calendar_pattern.search(decoded_url):
+    if "from=" in decoded_url or calendar_pattern.search(decoded_url):
         trap_counts["calendar_count"] += 1
     return trap_counts["calendar_count"] > MAX_CALENDAR_DEPTH
 
@@ -110,7 +84,7 @@ def is_calendar_pattern(url):
 def ui_state_pattern(url):
     decoded_url = unquote(url)
     decoded_url = unquote(decoded_url)
-    ui_states = ["do=", "tab_", "view=", "image=", "ns=", "tribe_", "ical=", "version="] #old do=media
+    ui_states = ["do=", "tab_", "view=", "image=", "ns=", "tribe_", "ical=", "login", "signup"] # added login and signup -- low info page
     return any(u in url for u in ui_states)
 
 
@@ -124,13 +98,13 @@ def has_session(url):
 def is_faceted_nav(url):
     decoded_url = unquote(url)
     decoded_url = unquote(decoded_url)
-    facets = ["filter=", "sort=", "format=", "precision=second"]
+    facets = ["filter=", "sort=", "format=", "precision=second", "query=", "?q=", "?s="] # added "query=", "?q=", "?s="
     return any(p in decoded_url for p in facets)
 
 
 def trap_domain(url):
-    trap_domains = ["wics.ics", "ngs.ics"]
-    trap_paths = ["/event", "/~eppstein/pix", "/doku.php"]
+    trap_domains = ["physics", "gitlab", "ngs.ics"] # moved gitlab from is_valid up here
+    trap_paths = ["/event", "/events", "/~eppstein/pix", "/doku.php"] # added /events
     parsed = urlparse(url)
     if any(parsed.path.startswith(d) for d in trap_paths):
         return True
@@ -165,9 +139,8 @@ def is_valid(url):
 
         # only links in domain should be valid
         domains = ['ics.uci.edu', 'cs.uci.edu', 'informatics.uci.edu', 'stat.uci.edu']
-        ignore_domains = ['gitlab', 'wics', 'physics']
         # netloc returns the hostname/authority
-        if not any(parsed.netloc == d or parsed.netloc.endswith('.' + d) for d in domains) or any((d + ".") in parsed.netloc for d in ignore_domains):
+        if not any(parsed.netloc == d or parsed.netloc.endswith('.' + d) for d in domains):
             return False
 
         return not re.match(
