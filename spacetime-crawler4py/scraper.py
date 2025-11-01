@@ -32,12 +32,10 @@ def extract_next_links(url, resp):
 
     # get content of page
     html_content = resp.raw_response.content
+    # do analysis
+    analysis(url, html_content)
     # parse with BeautifulSoup
     soup = BeautifulSoup(html_content, 'lxml')
-
-    # do analysis
-    text = soup.get_text(strip=True)
-    analysis(url, text)
 
     # extract links
     links = []
@@ -49,11 +47,11 @@ def extract_next_links(url, resp):
         # if url is an absolute one, it leaves url unchanged
         # otherwise if it is relative, it appends the resp.url
         try:
-            url = urljoin(resp.url, href)
+            next_url = urljoin(resp.url, href)
             # remove fragment
-            url, _ = urldefrag(url)
+            next_url, _ = urldefrag(next_url)
             # add link to list
-            links.append(url)
+            links.append(next_url)
         except Exception as e:
             continue
 
