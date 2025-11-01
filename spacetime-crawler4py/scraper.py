@@ -37,10 +37,6 @@ def extract_next_links(url, resp):
 
     # do analysis
     text = soup.get_text(strip=True)
-    words = text.split()
-    # NOTE 
-    # if (len(words) < 100):
-    #     return []
     analysis(url, text)
 
     # extract links
@@ -67,7 +63,7 @@ def extract_next_links(url, resp):
 def ui_state_pattern(url):
     decoded_url = unquote(url)
     decoded_url = unquote(decoded_url)
-    ui_states = ["do=", "tab_", "view=", "image=", "ns=", "tribe_", "ical=", "login", "signup"] # added login and signup -- low info page
+    ui_states = ["do=", "tab_", "view=", "image=", "ns=", "tribe_", "ical=", "login", "signup"]
     return any(u in url for u in ui_states)
 
 
@@ -81,13 +77,13 @@ def has_session(url):
 def is_faceted_nav(url):
     decoded_url = unquote(url)
     decoded_url = unquote(decoded_url)
-    facets = ["filter=", "sort=", "format=", "precision=second", "query=", "?q=", "?s="] # added "query=", "?q=", "?s="
+    facets = ["filter=", "sort=", "format=", "precision=second", "query=", "?q=", "?s="]
     return any(p in decoded_url for p in facets)
 
 
 def trap_domain(url):
-    trap_domains = ["physics", "gitlab", "ngs.ics"] # moved gitlab from is_valid up here
-    trap_paths = ["/event", "/events", "/~eppstein/pix", "/doku.php", "/photo"] # added /events
+    trap_domains = ["physics", "gitlab", "ngs.ics"] 
+    trap_paths = ["/event", "/events", "/~eppstein/pix", "/doku.php", "/photo"]
     parsed = urlparse(url)
     if any(parsed.path.startswith(d) for d in trap_paths):
         return True
