@@ -1,4 +1,6 @@
 from urllib.parse import urldefrag, urlparse
+from bs4 import BeautifulSoup
+
 import tokenizer
 
 

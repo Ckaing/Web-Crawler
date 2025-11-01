@@ -1,12 +1,28 @@
 import re
 from bs4 import BeautifulSoup
-from urllib.parse import unquote, urlparse, urljoin, urldefrag
+from urllib.parse import unquote, urlparse, urlunparse, parse_qs, urlencode, urljoin, urldefrag
+
 from analyze import analysis
 
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
     return [link for link in links if is_valid(link)]
+
+
+def normalize_url(url):
+    parsed = urlparse(url)
+    qs = parse_qs(parsed.query)
+
+    # Remove tracking params
+    for key in list(qs.keys()):
+        if key.lower() == "share" or key.lower().startswith("utm_"):
+            qs.pop(key)
+
+    # Rebuild the query string
+    new_query = urlencode(qs, doseq=True)
+    normalized = parsed._replace(query=new_query)
+    return urlunparse(normalized)
 
 
 def extract_next_links(url, resp):
@@ -48,6 +64,8 @@ def extract_next_links(url, resp):
         # otherwise if it is relative, it appends the resp.url
         try:
             next_url = urljoin(resp.url, href)
+            # remove tracking params
+            next_url = normalize_url(next_url) 
             # remove fragment
             next_url, _ = urldefrag(next_url)
             # add link to list
@@ -59,24 +77,23 @@ def extract_next_links(url, resp):
 
 
 def ui_state_pattern(url):
-    decoded_url = unquote(url)
-    decoded_url = unquote(decoded_url)
     ui_states = ["do=", "tab_", "view=", "image=", "ns=", "tribe_", "ical=", "login", "signup"]
     return any(u in url for u in ui_states)
 
 
 def has_session(url):
-    decoded_url = unquote(url)
-    decoded_url = unquote(decoded_url)
     sid_keys = ["sid=", "session=", "phpsessid=", "jsessionid=", "session", "id=", "version="]
-    return any(k in decoded_url for k in sid_keys)
+    return any(k in url for k in sid_keys)
 
 
 def is_faceted_nav(url):
-    decoded_url = unquote(url)
-    decoded_url = unquote(decoded_url)
     facets = ["filter=", "sort=", "format=", "precision=second", "query=", "?q=", "?s="]
-    return any(p in decoded_url for p in facets)
+    return any(p in url for p in facets)
+
+
+def is_directory_listing(url):
+    # catches typical Apache / Nginx auto-index pages
+    return "?c=" in url or "index of" in url
 
 
 def trap_domain(url):
@@ -91,13 +108,19 @@ def trap_domain(url):
 
 
 def is_trap(url):
-    if ui_state_pattern(url):
-        return True
     if trap_domain(url):
         return True
-    if has_session(url):
+
+    decoded_url = unquote(url)
+    decoded_url = unquote(decoded_url)
+
+    if ui_state_pattern(decoded_url):
         return True
-    if is_faceted_nav(url):
+    if has_session(decoded_url):
+        return True
+    if is_faceted_nav(decoded_url):
+        return True
+    if is_directory_listing(decoded_url):
         return True
     return False
 
@@ -128,7 +151,8 @@ def is_valid(url):
             + r"|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso"
             + r"|epub|dll|cnf|tgz|sha1"
             + r"|thmx|mso|arff|rtf|jar|csv"
-            + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path.lower())
+            + r"|rm|smil|wmv|swf|wma|zip|rar|gz"
+            + r"|txt|odc)$", parsed.path.lower())
 
     except TypeError:
         print("TypeError for ", parsed)
