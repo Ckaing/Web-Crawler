@@ -7,9 +7,6 @@ from analyze import analysis
 # 2025-10-29 11:06:29,863 - Worker-0 - INFO - Downloaded https://www.stat.uci.edu/wp-content/uploads/Shujie-Ma-Abstract-5-5-22, status <200>, using cache ('styx.ics.uci.edu', 9002).
 # encoding error : input conversion failed due to input error, bytes 0x90 0xFC 0x1F 0x6E
 
-# constants for TRAP depth
-MAX_CALENDAR_DEPTH = 10
-
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
@@ -71,16 +68,6 @@ def extract_next_links(url, resp):
     return links
 
 
-def is_calendar_pattern(url):
-    global trap_counts
-    calendar_pattern = re.compile(r'(?i)(\b(19|20)\d{2}[-/](0?[1-9]|1[0-2])\b)|month=|date=')
-    decoded_url = unquote(url)
-    decoded_url = unquote(decoded_url)
-    if "from=" in decoded_url or calendar_pattern.search(decoded_url):
-        trap_counts["calendar_count"] += 1
-    return trap_counts["calendar_count"] > MAX_CALENDAR_DEPTH
-
-
 def ui_state_pattern(url):
     decoded_url = unquote(url)
     decoded_url = unquote(decoded_url)
@@ -104,7 +91,7 @@ def is_faceted_nav(url):
 
 def trap_domain(url):
     trap_domains = ["physics", "gitlab", "ngs.ics"] # moved gitlab from is_valid up here
-    trap_paths = ["/event", "/events", "/~eppstein/pix", "/doku.php"] # added /events
+    trap_paths = ["/event", "/events", "/~eppstein/pix", "/doku.php", "/photo"] # added /events, /photo
     parsed = urlparse(url)
     if any(parsed.path.startswith(d) for d in trap_paths):
         return True

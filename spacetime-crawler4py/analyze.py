@@ -1,4 +1,4 @@
-from urllib.parse import urldefrag
+from urllib.parse import urldefrag, urlparse
 import tokenizer
 
 
@@ -37,7 +37,8 @@ def analysis(url, content):
 
 
 def write_analysis_to_file(file_name='report.txt'):
-    from scraper import unique_pages, longest_page, longest_page_url, word_freq, subdomains
+    # from scraper import unique_pages, longest_page, longest_page_url, word_freq, subdomains
+    global longest_page, longest_page_url, word_freq, subdomains, unique_pages
 
     with open(file_name, 'w', encoding='utf-8') as report:
         print("CRAWLER ANALYSIS RESULTS", file=report)
