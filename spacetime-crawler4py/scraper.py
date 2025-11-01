@@ -3,10 +3,6 @@ from bs4 import BeautifulSoup
 from urllib.parse import unquote, urlparse, urljoin, urldefrag
 from analyze import analysis
 
-#ISSUES 
-# 2025-10-29 11:06:29,863 - Worker-0 - INFO - Downloaded https://www.stat.uci.edu/wp-content/uploads/Shujie-Ma-Abstract-5-5-22, status <200>, using cache ('styx.ics.uci.edu', 9002).
-# encoding error : input conversion failed due to input error, bytes 0x90 0xFC 0x1F 0x6E
-
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
@@ -91,7 +87,7 @@ def is_faceted_nav(url):
 
 def trap_domain(url):
     trap_domains = ["physics", "gitlab", "ngs.ics"] # moved gitlab from is_valid up here
-    trap_paths = ["/event", "/events", "/~eppstein/pix", "/doku.php", "/photo"] # added /events, /photo
+    trap_paths = ["/event", "/events", "/~eppstein/pix", "/doku.php", "/photo"] # added /events
     parsed = urlparse(url)
     if any(parsed.path.startswith(d) for d in trap_paths):
         return True
