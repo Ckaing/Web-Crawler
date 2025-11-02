@@ -22,6 +22,7 @@ def get_base_domain(url):
 
 class Worker(Thread):
     def __init__(self, worker_id, config, frontier):
+        self.BUFFER_DELAY = 0.01
         self.logger = get_logger(f"Worker-{worker_id}", "Worker")
         self.config = config
         self.frontier = frontier
@@ -45,13 +46,12 @@ class Worker(Thread):
                 # get last time we accessed domain
                 last_time = self.frontier.last_access.get(domain, 0)
                 now = time.time()
-                # find how long it has been
-                elapsed = now - last_time
-                wait = max(0, self.config.time_delay - elapsed)
-                # UPDATES next access time before exiting lock
-                # this ensures that other threads that want access @ same time will
-                # sleep longer, because the .lock makes them wait for the updated time
-                self.frontier.last_access[domain] = now + wait
+                # find out what the next access time should be
+                next_allowed = max(now, last_time + self.config.time_delay + self.BUFFER_DELAY)
+                # update 
+                self.frontier.next_available_time[domain] = next_allowed
+                # compute wait time
+                wait = next_allowed - now
 
             # sleep for however long is necessary
             if wait > 0:
