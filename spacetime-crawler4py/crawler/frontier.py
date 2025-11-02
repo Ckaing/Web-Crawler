@@ -11,7 +11,7 @@ class Frontier(object):
     def __init__(self, config, restart):
         # multithreading
         self.lock = RLock() # initialize lock to prevent race conditions on shared resource
-        self.last_access = {} # keep track of last access per domain to maintain
+        self.next_available_time = {} # keep track of last access per domain to maintain
 
         self.logger = get_logger("FRONTIER")
         self.config = config
