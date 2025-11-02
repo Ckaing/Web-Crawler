@@ -3,7 +3,10 @@ from bs4 import BeautifulSoup
 from urllib.parse import unquote, urlparse, urlunparse, parse_qs, urlencode, urljoin, urldefrag
 
 from analyze import analysis
+from threegram import ThreeGram
 
+
+similarity_checker = ThreeGram()
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
@@ -48,11 +51,21 @@ def extract_next_links(url, resp):
 
     # get content of page
     html_content = resp.raw_response.content
-    # do analysis
-    analysis(url, html_content)
-    # parse with BeautifulSoup
-    soup = BeautifulSoup(html_content, 'lxml')
 
+    # parse text
+    soup = BeautifulSoup(html_content, 'lxml')
+    for tag in soup(['script', 'style', 'noscript']):
+        tag.decompose()
+    # do analysis
+    text = soup.get_text(separator=' ', strip=True)
+    # if page is similar to previous pages, do not analyze/extract links
+    if similarity_checker.similar(text):
+        return []
+    # do analysis
+    analysis(url, text)
+
+    # parse again with BeautifulSoup
+    soup = BeautifulSoup(html_content, 'lxml')
     # extract links
     links = []
     # for all <a href="web_link.com/...">web_title</a>

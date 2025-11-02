@@ -14,19 +14,13 @@ prev_url = ""
 trap_counts = {"calendar_count": 0}
 
 
-def analysis(url, html_content):
+def analysis(url, text):
     global longest_page, longest_page_url, word_freq, subdomains, unique_pages
 
     # defragment URL
     url, _ = urldefrag(url)
     unique_pages.add(url)
 
-    # parse text
-    soup = BeautifulSoup(html_content, 'lxml')
-    for tag in soup(['script', 'style', 'noscript']):
-        tag.decompose()
-    # do analysis
-    text = soup.get_text(separator=' ', strip=True)
     word_count, freq = tokenizer.compute_text_frequencies(text)
 
     # update longest page
