@@ -44,7 +44,7 @@ class Worker(Thread):
             wait = 0
             with self.frontier.lock:
                 # get last time we accessed domain
-                last_time = self.frontier.last_access.get(domain, 0)
+                last_time = self.frontier.next_available_time.get(domain, 0)
                 now = time.time()
                 # find out what the next access time should be
                 next_allowed = max(now, last_time + self.config.time_delay + self.BUFFER_DELAY)
