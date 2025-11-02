@@ -87,7 +87,7 @@ def has_session(url):
 
 
 def is_faceted_nav(url):
-    facets = ["filter=", "sort=", "format=", "precision=second", "query=", "?q=", "?s="]
+    facets = ["filter=", "sort=", "format=", "precision=second", "query=", "?q=", "?s=", "C=", "O="]  # added C= and O= which is similar to sorting
     return any(p in url for p in facets)
 
 
@@ -152,7 +152,8 @@ def is_valid(url):
             + r"|epub|dll|cnf|tgz|sha1"
             + r"|thmx|mso|arff|rtf|jar|csv"
             + r"|rm|smil|wmv|swf|wma|zip|rar|gz"
-            + r"|txt|odc)$", parsed.path.lower())
+            + r"|txt|odc)$"
+            + r"|mol|sdf)$", parsed.path.lower())  # added mol and sdf
 
     except TypeError:
         print("TypeError for ", parsed)
