@@ -21,10 +21,21 @@ def analysis(url, html_content):
     url, _ = urldefrag(url)
     unique_pages.add(url)
 
+    # TODO TEST THIS PART; 
+    # the basis of what it does is tries to get rid of HTML artifacts 
+    # i.e. anything between <script> </script> (first for loop) -- this is not part of page content and is just accompanying code
+    # class/id='c1', 'cc1cc', etc. --> attributes within <div> etc. 
+    # try to generate/find exmaples that contain these tags and stuff and pass them into this method to see if it'll still pick up on it
+        # should ignore
+    # something also called "escaped html" that i don't rlly know how to filter lol 
     # parse text
     soup = BeautifulSoup(html_content, 'lxml')
-    for tag in soup(['script', 'style', 'noscript']):
+    # getting rid of HTML 
+    for tag in soup(['script', 'style', 'noscript', 'iframe', 'meta', 'link']):
         tag.decompose()
+    for tag in soup.find_all(True):
+        tag.attrs.clear()
+
     # do analysis
     text = soup.get_text(separator=' ', strip=True)
     word_count, freq = tokenizer.compute_text_frequencies(text)
