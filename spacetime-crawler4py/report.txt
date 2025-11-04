@@ -1,68 +1,163 @@
 CRAWLER ANALYSIS RESULTS
 ----------------------------------------
 
-Number of unique pages crawled: 4
+Number of unique pages crawled: 9292
 
-Longest page: 925 words
-URL: https://www.ics.uci.edu
+Longest page: 311265 words
+URL: http://cdb.ics.uci.edu/supplement/randomSmiles100K
 
 Top 50 most common words:
 ----------------------------------------
- 1. research             41
- 2. undergraduate        29
- 3. science              28
- 4. graduate             27
- 5. computer             26
- 6. ics                  24
- 7. student              23
- 8. irvine               23
- 9. information          22
-10. faculty              21
-11. uc                   21
-12. 2025                 21
-13. news                 21
-14. us                   19
-15. department           18
-16. master               17
-17. informatics          17
-18. series               17
-19. statistics           16
-20. donald               15
-21. data                 15
-22. bren                 15
-23. seminar              15
-24. engineering          14
-25. explore              14
-26. students             14
-27. view                 13
-28. programs             13
-29. software             12
-30. spotlights           12
-31. sciences             12
-32. 00                   12
-33. hall                 12
-34. can                  11
-35. events               11
-36. alumni               11
-37. learn                11
-38. community            11
-39. admissions           10
-40. school               10
-41. future               10
-42. october              10
-43. learning             10
-44. program              9
-45. opportunities        8
-46. academic             8
-47. session              8
-48. get                  8
-49. follow               8
-50. process              8
+ 1. ccc                  224,498
+ 2. ccccc                95,382
+ 3. cccc                 56,416
+ 4. research             32,867
+ 5. coc                  30,728
+ 6. markellekelly        26,855
+ 7. student              23,521
+ 8. ccn                  22,999
+ 9. ics                  22,201
+10. nnc                  21,705
+11. computer             20,894
+12. occ                  20,654
+13. ccoc                 19,046
+14. software             18,981
+15. data                 18,213
+16. uci                  18,139
+17. graduate             17,046
+18. science              16,770
+19. undergraduate        16,246
+20. information          16,081
+21. informatics          16,072
+22. learning             15,236
+23. may                  14,798
+24. engineering          14,337
+25. html                 14,283
+26. irvine               14,209
+27. can                  14,045
+28. students             13,732
+29. news                 12,931
+30. update               12,574
+31. university           12,323
+32. september            12,190
+33. will                 12,101
+34. june                 11,917
+35. csc                  11,872
+36. july                 11,502
+37. automatic            11,487
+38. department           10,964
+39. scc                  10,931
+40. faculty              10,677
+41. august               10,633
+42. january              10,598
+43. april                10,570
+44. march                10,560
+45. design               10,504
+46. november             10,408
+47. december             10,225
+48. february             10,186
+49. october              10,159
+50. time                 9,773
 
 Subdomain distribution under uci.edu:
 ----------------------------------------
-www.cs.uci.edu, 1
-www.ics.uci.edu, 1
-www.informatics.uci.edu, 1
-www.stat.uci.edu, 1
+accessibility.ics.uci.edu, 6
+acoi.ics.uci.edu, 119
+aiclub.ics.uci.edu, 1
+archive-beta.ics.uci.edu, 9
+archive.ics.uci.edu, 201
+asterix.ics.uci.edu, 7
+betapro.proteomics.ics.uci.edu, 2
+capstone.cs.uci.edu, 8
+cdb.ics.uci.edu, 37
+cert.ics.uci.edu, 26
+chemdb.ics.uci.edu, 36
+chenli.ics.uci.edu, 10
+circadiomics.ics.uci.edu, 6
+cloudberry.ics.uci.edu, 43
+cml.ics.uci.edu, 265
+code.ics.uci.edu, 14
+computableplant.ics.uci.edu, 84
+courselisting.ics.uci.edu, 4
+create.ics.uci.edu, 4
+cs.ics.uci.edu, 12
+cs.uci.edu, 1
+cwicsocal18.ics.uci.edu, 11
+cyberclub.ics.uci.edu, 11
+cybert.ics.uci.edu, 25
+dgillen.ics.uci.edu, 32
+ds4all.ics.uci.edu, 5
+duttgroup.ics.uci.edu, 136
+dynamo.ics.uci.edu, 32
+edgelab.ics.uci.edu, 7
+emj.ics.uci.edu, 34
+evoke.ics.uci.edu, 2
+flamingo.ics.uci.edu, 12
+fr.ics.uci.edu, 3
+futurehealth.ics.uci.edu, 117
+grape.ics.uci.edu, 508
+graphics.ics.uci.edu, 8
+graphmod.ics.uci.edu, 1
+hack.ics.uci.edu, 1
+hai.ics.uci.edu, 6
+hobbes.ics.uci.edu, 10
+hpi.ics.uci.edu, 5
+i-sensorium.ics.uci.edu, 5
+iasl.ics.uci.edu, 1
+icde2023.ics.uci.edu, 45
+ics.uci.edu, 1952
+industryshowcase.ics.uci.edu, 21
+informatics.ics.uci.edu, 2
+informatics.uci.edu, 3
+insite.ics.uci.edu, 9
+intranet.ics.uci.edu, 1
+ipubmed.ics.uci.edu, 1
+isg.ics.uci.edu, 141
+jgarcia.ics.uci.edu, 33
+luci.ics.uci.edu, 4
+mailman.ics.uci.edu, 36
+malek.ics.uci.edu, 1
+mcs.ics.uci.edu, 11
+mdogucu.ics.uci.edu, 1
+mds.ics.uci.edu, 7
+mhcid.ics.uci.edu, 19
+mlphysics.ics.uci.edu, 17
+motifmap.ics.uci.edu, 2
+mover.ics.uci.edu, 24
+mswe.ics.uci.edu, 10
+mupro.proteomics.ics.uci.edu, 3
+nalini.ics.uci.edu, 7
+oai.ics.uci.edu, 5
+plrg.ics.uci.edu, 16
+psearch.ics.uci.edu, 1
+radicle.ics.uci.edu, 6
+redmiles.ics.uci.edu, 1
+riscit.ics.uci.edu, 1
+scale.ics.uci.edu, 6
+scratch.proteomics.ics.uci.edu, 4
+seal.ics.uci.edu, 45
+selectpro.proteomics.ics.uci.edu, 5
+sherlock.ics.uci.edu, 7
+stairs.ics.uci.edu, 4
+stat.uci.edu, 2
+statconsulting.ics.uci.edu, 5
+statistics-stage.ics.uci.edu, 10
+student-council.ics.uci.edu, 6
+studentcouncil.ics.uci.edu, 6
+summeracademy.ics.uci.edu, 5
+tad.ics.uci.edu, 2
+tastier.ics.uci.edu, 1
+tutoring.ics.uci.edu, 5
+ugradforms.ics.uci.edu, 1
+unite.ics.uci.edu, 10
+vision.ics.uci.edu, 212
+wics.ics.uci.edu, 508
+wiki.ics.uci.edu, 1
+www-db.ics.uci.edu, 24
+www.cs.uci.edu, 5
+www.ics.uci.edu, 2718
+www.informatics.ics.uci.edu, 1
+www.informatics.uci.edu, 1170
+www.stat.uci.edu, 276
+xtune.ics.uci.edu, 6
 
