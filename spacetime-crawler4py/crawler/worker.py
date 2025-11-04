@@ -22,7 +22,7 @@ def get_base_domain(url):
 
 class Worker(Thread):
     def __init__(self, worker_id, config, frontier):
-        self.BUFFER_DELAY = 0.01
+        self.BUFFER_DELAY = 0.1
         self.logger = get_logger(f"Worker-{worker_id}", "Worker")
         self.config = config
         self.frontier = frontier
