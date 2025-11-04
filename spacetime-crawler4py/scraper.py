@@ -5,7 +5,14 @@ from urllib.parse import unquote, urlparse, urlunparse, parse_qs, urlencode, url
 from analyze import analysis
 
 
-# TODO desc
+""" 
+    Description: Scraper function to extract links from a page by calling extract_next_links
+    and filter them with is_valid to guarantee only valid links are returned
+
+    Input: a url and response object
+    Output: list of valid links
+
+    """
 def scraper(url, resp):
     links = extract_next_links(url, resp)
     return [link for link in links if is_valid(link)]
@@ -34,7 +41,14 @@ def normalize_url(url):
     return urlunparse(normalized)
 
 
-# TODO desc
+""" 
+    Description: extract links from a page with a valid response code that
+    are defragmented and normalized
+
+    Input: a url and response object
+    Output: return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
+
+    """
 def extract_next_links(url, resp):
     # Implementation required.
     # url: the URL that was used to get the page
