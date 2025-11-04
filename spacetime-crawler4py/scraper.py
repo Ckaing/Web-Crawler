@@ -80,26 +80,54 @@ def extract_next_links(url, resp):
     return links
 
 
-# TODO desc
 def ui_state_pattern(url):
+    """
+    Description: Keywords that indicate images or other media, as well as
+    user authetication which has low informational content
+
+    Input: The url we want to evaluate
+    Output: True/False
+
+    """
     ui_states = ["do=", "tab_", "view=", "image=", "ns=", "tribe_", "ical=", "login", "signup"]
     return any(u in url for u in ui_states)
 
 
-# TODO desc
 def has_session(url):
+    """
+    Description: Keywords that indicate different sessions/ids of a url
+    while having the same if not similar content as other sessions
+
+    Input: The url we want to evaluate
+    Output: True/False
+
+    """
     sid_keys = ["sid=", "session=", "phpsessid=", "jsessionid=", "session", "id=", "version="]
     return any(k in url for k in sid_keys)
 
 
-# TODO desc
 def is_faceted_nav(url):
+    """
+    Description: Keywords that indicate different UI based on user preference
+    (i.e. sort, filter) with the same content
+
+    Input: The url we want to evaluate
+    Output: True/False
+
+    """
     facets = ["filter=", "sort=", "format=", "precision=second", "query=", "?q=", "?s=", "C=", "O="] 
     return any(p in url for p in facets)
 
 
-# TODO desc
 def is_directory_listing(url):
+    """
+    Description: Keywords that are part of Apache / Nginx pages that
+    auto-index which dynamically creates pages leading to infinite loops
+
+    Input: The url we want to evaluate
+    Output: True/False
+
+    """
     # catches typical Apache / Nginx auto-index pages
     return "?c=" in url or "index of" in url
 
