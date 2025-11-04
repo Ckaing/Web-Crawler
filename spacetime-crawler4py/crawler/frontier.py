@@ -10,8 +10,10 @@ from scraper import is_valid
 class Frontier(object):
     def __init__(self, config, restart):
         # multithreading
-        self.lock = RLock() # initialize lock to prevent race conditions on shared resource
-        self.next_available_time = {} # keep track of last access per domain to maintain
+        # initialize lock to prevent race conditions on shared resource
+        self.lock = RLock() 
+        # keep track of next allowed access time per domain
+        self.next_available_time = {} 
 
         self.logger = get_logger("FRONTIER")
         self.config = config

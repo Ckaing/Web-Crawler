@@ -10,31 +10,28 @@ longest_page = 0
 longest_page_url = ""
 word_freq = {}
 subdomains = {}
-prev_url = ""
-trap_counts = {"calendar_count": 0}
-
 
 def analysis(url, html_content):
+    """
+    Description: Analyzes a page for the report, updating global values
+    unique_pages, longest_page, longest_page_url, word_freq, subdomains, 
+
+    Input: The url of the page that we are analyzing and its content
+    Output: None; updates global parameters
+    """
     global longest_page, longest_page_url, word_freq, subdomains, unique_pages
 
     # defragment URL
     url, _ = urldefrag(url)
     unique_pages.add(url)
 
-    # TODO TEST THIS PART; 
-    # the basis of what it does is tries to get rid of HTML artifacts 
-    # i.e. anything between <script> </script> (first for loop) -- this is not part of page content and is just accompanying code
-    # class/id='c1', 'cc1cc', etc. --> attributes within <div> etc. 
-    # try to generate/find exmaples that contain these tags and stuff and pass them into this method to see if it'll still pick up on it
-        # should ignore
-    # something also called "escaped html" that i don't rlly know how to filter lol 
-    # parse text
     soup = BeautifulSoup(html_content, 'lxml')
+    # NOTE: I think we can remove this bc it didn't actually do anything
     # getting rid of HTML 
-    for tag in soup(['script', 'style', 'noscript', 'iframe', 'meta', 'link']):
-        tag.decompose()
-    for tag in soup.find_all(True):
-        tag.attrs.clear()
+    # for tag in soup(['script', 'style', 'noscript', 'iframe', 'meta', 'link']):
+    #     tag.decompose()
+    # for tag in soup.find_all(True):
+    #     tag.attrs.clear()
 
     # do analysis
     text = soup.get_text(separator=' ', strip=True)
@@ -55,7 +52,13 @@ def analysis(url, html_content):
 
 
 def write_analysis_to_file(file_name='report.txt'):
-    # from scraper import unique_pages, longest_page, longest_page_url, word_freq, subdomains
+    """
+    Description: Writes the global report parameters into a file for us
+    to reference after execution
+
+    Input: The file name to write to, defaulted to report.txt
+    Output: None; prints to file
+    """
     global longest_page, longest_page_url, word_freq, subdomains, unique_pages
 
     with open(file_name, 'w', encoding='utf-8') as report:
@@ -87,10 +90,3 @@ def write_analysis_to_file(file_name='report.txt'):
         for subdomain, count in sorted_subdomains:
             print(f"{subdomain}, {count}", file=report)
         print(file=report)
-
-    # TODO ADDED ENTIRE FREQ DICT
-    with open('all_words.txt', 'w', encoding='utf-8') as all_freq:
-        sorted_words = sorted(word_freq.items(), key=lambda x: x[1], reverse=True)
-        for i, (word, freq) in enumerate(sorted_words[:50], 1):
-            print(f"{i:2d}. {word:20s} {freq:,}", file=all_freq)
-        print(file=all_freq)

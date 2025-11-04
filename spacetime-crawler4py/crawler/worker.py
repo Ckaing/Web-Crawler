@@ -8,10 +8,16 @@ import time
 
 from urllib.parse import urlparse
 
-# get the DOMAIN, not the subdomain
+
 def get_base_domain(url):
-    parsed = urlparse(url)  # [subdomain if applicable].domain.suffix
-    # get rid of subdomain --> extract just domain.suffix
+    """
+    Description: Match url to its base domain. Remove the subdomain if
+    present, so that we uphold politeness per DOMAIN, not subdomain
+
+    Input: The url that we evaluate
+    Output: The domain
+    """
+    parsed = urlparse(url)  
     host = parsed.netloc.lower()
     domains = ['ics.uci.edu', 'cs.uci.edu', 'informatics.uci.edu', 'stat.uci.edu']
     for d in domains:
@@ -22,6 +28,7 @@ def get_base_domain(url):
 
 class Worker(Thread):
     def __init__(self, worker_id, config, frontier):
+        # added buffer for computation time
         self.BUFFER_DELAY = 0.1
         self.logger = get_logger(f"Worker-{worker_id}", "Worker")
         self.config = config
@@ -66,6 +73,3 @@ class Worker(Thread):
             for scraped_url in scraped_urls:
                 self.frontier.add_url(scraped_url)
             self.frontier.mark_url_complete(tbd_url)
-
-            # maybe can remove later bc we have sleep but keep for safety reasons
-            # time.sleep(self.config.time_delay)

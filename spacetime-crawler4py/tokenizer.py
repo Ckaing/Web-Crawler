@@ -20,7 +20,14 @@ STOP_WORDS = {
     "you'd", "you'll", "you're", "you've", 'your', 'yours', 'yourself', 'yourselves'
 }
 
+
 def compute_text_frequencies(text):
+    """
+    Description: Streamlines the computation from text to frequency dictionary
+
+    Input: The string to convert into a frequency dictionary
+    Output: The resulting dictionary
+    """
     tokens = tokenize(text)
     if tokens is not None:
         freq = compute_word_frequencies(tokens)
@@ -29,25 +36,29 @@ def compute_text_frequencies(text):
         print('Please resolve the error and try again.')
         return None
 
+
 def tokenize(content):
     """
-    Runtime complexity: Linear time O(n), where n = number of characters in the file.
-    Explanation: Each character is read exactly once and processed. Memory usage is balanced using chunks.
+    Description: Breaks content down into tokens
+
+    Input: The string to tokenize
+    Output: A list of tokens
     """
     tokens = []
     word = ''
 
+    # remove case sensitivity
     content = content.lower()
 
     for c in content:
-        if 'a' <= c and c <= 'z': # or '0' <= c and c <= '9':
+        if 'a' <= c and c <= 'z': 
             word += c
         else:
-            if len(word) > 2 and word not in STOP_WORDS: # NOTE: CHANGED TO >2 
+            if len(word) > 2 and word not in STOP_WORDS:
                 tokens.append(word)
             word = ''
 
-    if len(word) > 1 and word not in STOP_WORDS:
+    if len(word) > 2 and word not in STOP_WORDS:
         tokens.append(word)
 
     return tokens
@@ -55,8 +66,11 @@ def tokenize(content):
 
 def compute_word_frequencies(tokens):
     """
-    Runtime complexity: Linear time O(m), where m = number of tokens.
-    Explanation: Iterates through all tokens once. Dictionary lookup and insertion are O(1) on average.
+    Description: Turns list of tokens into a dictionary of counts for 
+    each unique token.
+
+    Input: A list of tokens
+    Output: The dictionary of frequency counts for each unique token
     """
     freq = {}
     for token in tokens:
@@ -68,27 +82,13 @@ def compute_word_frequencies(tokens):
 
 
 def union_freq(freq1, freq2):
+    """
+    Description: Combines two dictionaries of frequency counts into one
+
+    Input: Two frequency dictionaries
+    Output: One dicionary containing the combined result
+    """
     result = {}
     for key in freq1.keys() | freq2.keys(): 
         result[key] = freq1.get(key, 0) + freq2.get(key, 0)
     return result
-
-
-# def intersection(content1, content2):
-#     """
-#     Runtime complexity: Linear time O(n1 + n2 + k1 + k2), where n1 and n2 are the number of characters 
-#     in each file and k1 and k2 are the number of tokens.
-#     Explanation: Both files are read character by character, and all tokens are then counted 
-#     for frequency and compared for intersection.
-#     """
-#     freq_1 = compute_text_frequencies(content1)
-#     freq_2 = compute_text_frequencies(content2)
-
-#     if freq_1 is None or freq_2 is None:
-#         return None
-
-#     unique_tokens_1 = freq_1.keys()
-#     unique_tokens_2 = freq_2.keys()
-#     intersect = unique_tokens_1 & unique_tokens_2
-
-#     return intersect
