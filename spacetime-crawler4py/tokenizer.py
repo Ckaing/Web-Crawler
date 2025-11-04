@@ -40,10 +40,10 @@ def tokenize(content):
     content = content.lower()
 
     for c in content:
-        if 'a' <= c and c <= 'z' or '0' <= c and c <= '9':
+        if 'a' <= c and c <= 'z': # or '0' <= c and c <= '9':
             word += c
         else:
-            if len(word) > 1 and word not in STOP_WORDS:
+            if len(word) > 2 and word not in STOP_WORDS: # NOTE: CHANGED TO >2 
                 tokens.append(word)
             word = ''
 

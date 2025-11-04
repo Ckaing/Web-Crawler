@@ -87,3 +87,10 @@ def write_analysis_to_file(file_name='report.txt'):
         for subdomain, count in sorted_subdomains:
             print(f"{subdomain}, {count}", file=report)
         print(file=report)
+
+    # TODO ADDED ENTIRE FREQ DICT
+    with open('all_words.txt', 'w', encoding='utf-8') as all_freq:
+        sorted_words = sorted(word_freq.items(), key=lambda x: x[1], reverse=True)
+        for i, (word, freq) in enumerate(sorted_words[:50], 1):
+            print(f"{i:2d}. {word:20s} {freq:,}", file=all_freq)
+        print(file=all_freq)
