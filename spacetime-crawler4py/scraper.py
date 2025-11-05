@@ -5,7 +5,6 @@ from urllib.parse import unquote, urlparse, urlunparse, parse_qs, urlencode, url
 from analyze import analysis
 
 
-
 def scraper(url, resp):
     """ 
     Description: Scraper function to extract links from a page by calling extract_next_links
@@ -42,7 +41,6 @@ def normalize_url(url):
     return urlunparse(normalized)
 
 
-# TODO desc
 def extract_next_links(url, resp):
     """ 
     Description: extract links from a page with a valid response code that
@@ -50,7 +48,6 @@ def extract_next_links(url, resp):
 
     Input: a url and response object
     Output: return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
-
     """
     # Implementation required.
     # url: the URL that was used to get the page
@@ -103,7 +100,6 @@ def ui_state_pattern(url):
 
     Input: The url we want to evaluate
     Output: True/False
-
     """
     ui_states = ["do=", "tab_", "view=", "image=", "ns=", "tribe_", "ical=", "login", "signup"]
     return any(u in url for u in ui_states)
@@ -116,7 +112,6 @@ def has_session(url):
 
     Input: The url we want to evaluate
     Output: True/False
-
     """
     sid_keys = ["sid=", "session=", "phpsessid=", "jsessionid=", "session", "id=", "version="]
     return any(k in url for k in sid_keys)
@@ -129,7 +124,6 @@ def is_faceted_nav(url):
 
     Input: The url we want to evaluate
     Output: True/False
-
     """
     facets = ["filter=", "sort=", "format=", "precision=second", "query=", "?q=", "?s=", "C=", "O="] 
     return any(p in url for p in facets)
@@ -137,14 +131,12 @@ def is_faceted_nav(url):
 
 def is_directory_listing(url):
     """
-    Description: Keywords that are part of Apache / Nginx pages that
-    auto-index which dynamically creates pages leading to infinite loops
+    Description: Keywords that are part of Apache / Nginx query parameters
 
     Input: The url we want to evaluate
     Output: True/False
-
     """
-    # catches typical Apache / Nginx auto-index pages
+    # catches apache / nginx auto-index pages
     return "?c=" in url or "index of" in url
 
 
@@ -212,6 +204,7 @@ def is_valid(url):
         if not any(parsed.netloc == d or parsed.netloc.endswith('.' + d) for d in domains):
             return False
 
+        # match against unwanted files
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
